@@ -33,12 +33,21 @@ def avaliacao(individuo, clientes, aps, capacidades):
 
     return distancia_normalizada + penalidade_sobrecarga + penalidade_balanceamento
 
-def gerar_individuo(num_clientes, aps, clientes):
-    individual = []
-    for cliente_pos in clientes:
-        closest_ap = min(range(len(aps)), key=lambda i: calcular_distancia(cliente_pos, aps[i]))
-        individual.append(closest_ap)
-    return individual
+def gerar_individuo(num_clientes, aps, clientes, aleatorio=False):
+    individuo = []
+    
+    if aleatorio:
+        
+        individuo = [random.randint(0, len(aps) - 1) for _ in range(num_clientes)]
+    
+    else:
+       
+        for cliente_pos in clientes:
+            prox_ap = min(range(len(aps)), key=lambda i: calcular_distancia(cliente_pos, aps[i]))
+            individuo.append(prox_ap)
+    
+    return individuo
+
 
 
 def cruzamento(pai1, pai2):
@@ -51,6 +60,7 @@ def mutacao(individuo, num_aps, geracao, max_geracoes):
     
     taxa_mutacao = 0.1 * (1 - geracao / max_geracoes)
     for i in range(len(individuo)):
+        #Reatribui de forma aleatoria
         if random.random() < taxa_mutacao:
             individuo[i] = random.randint(0, num_aps - 1)
 
@@ -67,7 +77,8 @@ def algoritmo_genetico(clientes, aps, capacidades, tamanho_populacao=100, geraco
     num_aps = len(aps)
 
   
-    populacao = [gerar_individuo(num_clientes, aps, clientes) for _ in range(tamanho_populacao)]
+    populacao = [gerar_individuo(num_clientes, aps, clientes, aleatorio=True) for _ in range(tamanho_populacao)]
+
 
     melhor_avaliacao = float('inf')
     contagem_sem_melhoria = 0
@@ -76,16 +87,16 @@ def algoritmo_genetico(clientes, aps, capacidades, tamanho_populacao=100, geraco
         valores_avaliacao = [avaliacao(ind, clientes, aps, capacidades) for ind in populacao]
         melhor_avaliacao_atual = min(valores_avaliacao)
 
-        # Verifica se houve melhoria
+      
         if melhor_avaliacao_atual < melhor_avaliacao:
             melhor_avaliacao = melhor_avaliacao_atual
             contagem_sem_melhoria = 0
         else:
             contagem_sem_melhoria += 1
-        
+        '''
         if contagem_sem_melhoria > 50:  
             break
-        
+        '''
         
         populacao = selecao_torneio(populacao, valores_avaliacao)
 
